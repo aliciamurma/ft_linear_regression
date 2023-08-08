@@ -1,33 +1,76 @@
 import sys
-import  csv
+import csv
 import os.path
+import re
 
 # estimatePrice(mileage) = theta0 + (theta1 * mileage)
+# with cierra el archivo automaticamente
+# Una vez que el bloque de codigo finaliza, el archivo se cierra automaticamente
+
+def isCorrectData(lenKm, lenPrice):
+    if (lenKm != lenPrice):
+        print("Error in datafile")
+        sys.exit(-1)
+
+def isCorrectRow():
+    nRow = 0
+    nCol = 0
+
+    with open("data.csv", 'r') as csv_file:
+        csv_reader = csv.reader(csv_file)
+        for row in csv_reader:
+            nRow += 1
+            if nRow == 1:  # La primera fila contiene los encabezados/columnas
+                nCol = len(row)
+    if (nRow != 2):
+        print("Error in datafile")
+        sys.exit(-1)
+
+def getLenData():
+    km = []
+    price = []
+
+    with open("data.csv", 'r') as csv_file:
+        csv_reader = csv.reader(csv_file)
+        for row in csv_reader:
+            if len(row) >= 2: # Si hay mas de 2 columnas
+                km.append(row[0])
+                price.append(row[1])
+    isCorrectData(len(km), len(price))
+    return len(km)
 
 def main():
     theta0 = 0.
     theta1 = 0.
-    price = []
-    km = []
-    #while len(mileage) is 0:
-   #     print("Enter the mileage: ")
+    dataLen = getLenData() -1
+
     mileage = input("Enter the mileage: ")
+    while ((mileage <= 0)):
+        mileage = input("Enter the mileage: ")
+
     try:
         mileage = float(mileage)
         try:
-            with open("data.csv", 'r') as csv_file :
-      #      with open('file', 'r') as csv_file:
-                value = csv_file.readlines()
-                index = value[0].index('=')
+            if os.path.exists("data.csv"):
+                with open("data.csv", 'r') as f:
+                    lines = f.readlines()
+                    theta0 = float(f.read().split(','))
         except Exception as e:
-            print("Error: ", e)
-        print("Price: ")
+            print("Error 1: ", e)
+        
+        print("THETA0", theta0)
+        print("THETA1", theta1)
+        print("mileage", mileage)
+
+        line = float(theta0) + (float(theta1) * float(mileage))
+        
+        #print("Price: ")
+        #print(hypothesis(float(theta0), float(theta1), mileage))
+    #    price = theta0 + (theta1 * float(mileage)) # equivale a la funcion y = mx + b
+        print(price)
     except ValueError as e:
         print(e, "Enter the mileage: ")
         main()
 
 if __name__ == "__main__":
     main()
-
-#    if len(argv) == 0:
-#        print("The result of the prediction which should be 0 since it has not gone through the learning phase")
