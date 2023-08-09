@@ -2,6 +2,7 @@ import sys
 import csv
 import os.path
 import re
+import pandas as pd
 
 # estimatePrice(mileage) = theta0 + (theta1 * mileage)
 # with cierra el archivo automaticamente
@@ -39,6 +40,15 @@ def getLenData():
     isCorrectData(len(km), len(price))
     return len(km)
 
+def getTethas():
+    try:
+        if os.path.exists("data.csv"):
+            with open("data.csv", 'r') as f:
+                lines = f.readlines()
+                
+    except Exception as e:
+        print("Error 1: ", e)
+
 def main():
     theta0 = 0.
     theta1 = 0.
@@ -54,7 +64,8 @@ def main():
             if os.path.exists("data.csv"):
                 with open("data.csv", 'r') as f:
                     lines = f.readlines()
-                    theta0 = float(f.read().split(','))
+                    theta0 = lines[1][0]
+                    theta1 = lines[1][1]
         except Exception as e:
             print("Error 1: ", e)
         
@@ -62,7 +73,7 @@ def main():
         print("THETA1", theta1)
         print("mileage", mileage)
 
-        line = float(theta0) + (float(theta1) * float(mileage))
+        price = float(theta0) + (float(theta1) * float(mileage))
         
         #print("Price: ")
         #print(hypothesis(float(theta0), float(theta1), mileage))
