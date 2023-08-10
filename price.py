@@ -113,27 +113,18 @@ def main():
     theta1 = 0.0
     price = []
 
-    mileage = input("Enter the mileage: ")
-    while (int(mileage) <= 0):
-        mileage = input("Enter the mileage: ")
+    mileage_str = input("Enter the mileage: ")
+    mileage = float(mileage_str)
+    while mileage <= 0:
+        mileage_str = input("Enter a positive mileage: ")
+        mileage = float(mileage_str)
     
-    theta0, theta1 = getTheta()
+    theta0, theta1 = trainedThetas("thetas.txt")
     price = formula(theta0, theta1, mileage)
     if price < 0:
         print("Error in price")
     else:
         print("ESTIMATED PRICE: ", price)
-
-    file = "data.csv"
-    data = pd.read_csv(file)
-    data.head()
-    fig = plt.figure(figsize=(14,14))
-
-"""
-    dataframe.shape
-    dataframe.head()
-    dataframe.describe()
-"""
 
 """
     try:
