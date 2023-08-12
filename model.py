@@ -3,7 +3,6 @@ import csv
 import os.path
 import re
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
 
 # tmp0 = learningRate * 1/m suma(estimatePrice(mileage[i]) - price[i])

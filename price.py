@@ -3,7 +3,6 @@ import csv
 import os.path
 import re
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
 
 # estimatePrice(mileage) = theta0 + (theta1 * mileage)
@@ -125,33 +124,6 @@ def main():
         print("Error in price")
     else:
         print("ESTIMATED PRICE: ", price)
-
-"""
-    try:
-        mileage = float(mileage)
-        try:
-            if os.path.exists("data.csv"):
-                with open("data.csv", 'r') as f:
-                    lines = f.readlines()
-                    theta0 = lines[1][0]
-                    theta1 = lines[1][1]
-        except Exception as e:
-            print("Error 1: ", e)
-        
-        print("THETA0", theta0)
-        print("THETA1", theta1)
-        print("mileage", mileage)
-
-        price = float(theta0) + (float(theta1) * float(mileage))
-        
-        #print("Price: ")
-        #print(hypothesis(float(theta0), float(theta1), mileage))
-    #    price = theta0 + (theta1 * float(mileage)) # equivale a la funcion y = mx + b
-        print(price)
-    except ValueError as e:
-        print(e, "Enter the mileage: ")
-        main()
-"""
 
 if __name__ == "__main__":
     main()
