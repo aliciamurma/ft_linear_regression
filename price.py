@@ -41,44 +41,6 @@ def getLenData():
     isCorrectData(len(km), len(price))
     return len(km)
 
-def getKm():
-    km = []
-    i = 0
-
-    for line in open("data.csv").readlines():
-        if (len(line) != 0 and len(line) != 1):
-            index = line.index(',')
-            tmp = line[:index]
-            print("tmp: ", tmp)
-            if i != 0:
-                try:
-                    tmp = float(tmp) / 1000
-                except Exception as e:
-                    print("Error 1: ", e)
-            km.append(tmp)
-        i += 1
-    km = km[1:]
-    print(km)
-
-def getPrice():
-    price = []
-    i = 0
-
-    for line in open("data.csv").readlines():
-        if (len(line) != 0 and len(line) != 1):
-            index = line.index(',')
-            tmp = line[index +1: -1]
-            print("tmp: ", tmp)
-            if i != 0:
-                try:
-                    tmp = float(tmp) / 1000
-                except Exception as e:
-                    print("Error 1: ", e)
-            price.append(tmp)
-        i += 1
-    price = price[1:]
-    print(price)
-
 def getTheta():
     theta0 = 0.
     theta1 = 0.
@@ -107,19 +69,34 @@ def trainedThetas(filename):
         theta0, theta1 = map(float, file.readline().split())
     return theta0, theta1
 
+def onlyNbr(str):
+    for i in str:
+        if not i.isdigit():
+            return False
+    return True
+
+def enterMileage():
+    mileage_str = input("Enter the mileage: ")
+    while (len(mileage_str) == 0) or (onlyNbr(mileage_str) is False):
+        mileage_str = input("Enter a positive numeric mileage: ")
+    mileage = float(mileage_str)
+    while (len(mileage_str) == 0) or (onlyNbr(mileage_str) is False):
+        mileage_str = input("Enter a positive numeric mileage: ")
+    mileage = float(mileage_str)
+    print("Thanks!")
+    return (mileage)
+
 def main():
     theta0 = 0.0
     theta1 = 0.0
     price = []
 
-    mileage_str = input("Enter the mileage: ")
-    mileage = float(mileage_str)
-    while mileage <= 0:
-        mileage_str = input("Enter a positive mileage: ")
-        mileage = float(mileage_str)
-    
-    theta0, theta1 = trainedThetas("thetas.txt")
-    price = formula(theta0, theta1, mileage)
+    mileage = enterMileage()
+    if os.path.exists("thetas.txt"):
+        theta0, theta1 = trainedThetas("thetas.txt")
+        price = formula(theta0, theta1, mileage)
+    else:
+        price = 0
     if price < 0:
         print("Error in price")
     else:
