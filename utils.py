@@ -52,3 +52,21 @@ def getPrice():
         i += 1
     price = price[1:]
     print(price)
+
+def getTheta():
+    theta0 = 0.
+    theta1 = 0.
+    i = 0
+
+    if os.path.exists("data.csv"):
+        with open("data.csv", 'r') as f:
+            lines = f.readlines()
+            print("i ", i)
+            for row in lines:
+                if i != 0:
+                    theta0 = float(row[0])
+                    theta1 = float(row[1])
+                    break
+                i += 1
+    print("t0 ", theta0, "t1 ", theta1)
+    return (theta0, theta1)
