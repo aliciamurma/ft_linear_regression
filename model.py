@@ -89,7 +89,8 @@ def checkHeader():
                 if (len(row) != 0 and (onlyNbr(row[0]) is True and onlyNbr(row[1]) is True)):
                     print("Write in the first line of your csv file: km,price")
                     sys.exit(-1)
-            i += 1
+            if (len(row) != 0):
+                i += 1
 
 def is_empty_file(file):
     return os.path.getsize(file) == 0
