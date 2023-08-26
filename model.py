@@ -155,9 +155,11 @@ def obtain_data():
         print("Error: ", e)
     return km, price
 
-def calculate_real_thetas(theta0, theta1, min, max):
+# Before, we have normalized the mileage, so now we have to unnormalized theta values
+# We need the min and max values of mileage, bc we have normalized it with them
+def calculate_real_thetas(theta0, theta1, max, min):
     real_theta0 = theta0 - theta1 * min / (max - min)
-    real_theta1 = theta1 / (max - min)
+    real_theta1 = theta1 / (max - min) 
     return real_theta0, real_theta1
 
 # If the 
@@ -172,7 +174,7 @@ def lower_tolerance(theta0, theta1, price, normalized):
         return True
     return False
 
-def training_loop(max, min, normalized):
+def training_loop(normalized):
     try:
         iterations = 10000000 # The loop can stop before
         learning_rate = 0.001
@@ -188,9 +190,8 @@ def training_loop(max, min, normalized):
             # Monitor the error of the linear regression until it be lower than 0.0001
             if lower_tolerance(theta0, theta1, price, normalized) is True:
                 break
-        
-        real_theta0, real_theta1 = calculate_real_thetas(theta0, theta1, min, max)
-        return real_theta0, real_theta1
+
+        return theta0, theta1
     except Exception as e:
         print("Error: ", e)
 
@@ -207,7 +208,10 @@ def train_model():
         normalized_mileage = [(x - min_mileage) / (max_mileage - min_mileage) for x in mileage] # Normalization
         # The formula scales the mileage value 0-1 --> 0 minimum mileage // 1 maximum mileage
         
-        real_theta0, real_theta1 = training_loop(max_mileage, min_mileage, normalized_mileage)
+        # Obtain the thetas from the trained loop
+        theta0, theta1 = training_loop(normalized_mileage)
+        # Reverse normalization
+        real_theta0, real_theta1 = calculate_real_thetas(theta0, theta1, max_mileage, min_mileage)
 
         with open('thetas.txt', 'w') as file:
             file.write(f"{real_theta0} {real_theta1}\n")
