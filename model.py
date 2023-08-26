@@ -129,7 +129,7 @@ def get_thetas(mileage, price, theta0, theta1, learningRate):
     tmp_theta1 = learningRate * (1/m) * temp1
     return tmp_theta0, tmp_theta1
 
-# Calculate the standard desviation (error)
+# Gives the error between the predicted prices based on the current thetas and the actual prices
 def get_error(theta0, theta1, price, mileage):
     error = 0
     for i in range(len(mileage)): # Start the loop for mileage
@@ -160,11 +160,21 @@ def calculate_real_thetas(theta0, theta1, min, max):
     real_theta1 = theta1 / (max - min)
     return real_theta0, real_theta1
 
+# If the 
+def lower_tolerance(theta0, theta1, price, normalized):
+    tolerance = 0.0001
+    prev_cost = float('inf')  # Initialize with a large value
+
+    current_cost = get_error(theta0, theta1, price, normalized) # Error between actual and real price
+    cost_difference = abs(prev_cost - current_cost) # Absolute diference
+    prev_cost = current_cost # Update prev_cost
+    if cost_difference < tolerance: # If the difference is smaller than 0.001, return true
+        return True
+    return False
+
 def training_loop(max, min, normalized):
     try:
-        prev_cost = float('inf')  # Initialize with a large value
-        tolerance = 0.0001
-        iterations = 10000000 # The code can stop before
+        iterations = 10000000 # The loop can stop before
         learning_rate = 0.001
         theta0 =  0.0 # Always start on 0
         theta1 =  0.0 # Always start on 0
@@ -175,11 +185,8 @@ def training_loop(max, min, normalized):
             theta0 -= temp_theta0
             theta1 -= temp_theta1
 
-            current_cost = get_error(theta0, theta1, price, normalized)
-            cost_difference = abs(prev_cost - current_cost)
-            prev_cost = current_cost
-
-            if cost_difference < tolerance:
+            # Monitor the error of the linear regression until it be lower than 0.0001
+            if lower_tolerance(theta0, theta1, price, normalized) is True:
                 break
         
         real_theta0, real_theta1 = calculate_real_thetas(theta0, theta1, min, max)
