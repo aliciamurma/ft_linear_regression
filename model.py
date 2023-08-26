@@ -46,6 +46,7 @@ def getLenData():
 def checkCorrectLenData():
     km = []
     price = []
+    i = 0
 
     with open("data.csv", 'r') as csv_file:
         csv_reader = csv.reader(csv_file)
@@ -59,6 +60,7 @@ def checkCorrectLenData():
                 if len(price[i]) == 0:
                     print("Error, incorrect price lenght")
                     sys.exit()
+            i += 1
 
 # Check if in the given string there are only digits
 def onlyNbr(str):
@@ -127,6 +129,7 @@ def get_thetas(mileage, price, theta0, theta1, learningRate):
 
     tmp_theta0 = learningRate * (1/m) * temp0
     tmp_theta1 = learningRate * (1/m) * temp1
+
     return tmp_theta0, tmp_theta1
 
 # Gives the error between the predicted prices based on the current thetas and the actual prices
@@ -159,41 +162,34 @@ def obtain_data():
 # We need the min and max values of mileage, bc we have normalized it with them
 def calculate_real_thetas(theta0, theta1, max, min):
     real_theta0 = theta0 - theta1 * min / (max - min)
-    real_theta1 = theta1 / (max - min) 
+    real_theta1 = theta1 / (max - min)
     return real_theta0, real_theta1
 
-# If the 
-def lower_tolerance(theta0, theta1, price, normalized):
+def training_loop(normalized):
     tolerance = 0.0001
+    iterations = 10000000 # The loop can stop before
+    theta0 =  0.0 # Always start on 0
+    theta1 =  0.0 # Always start on 0
     prev_cost = float('inf')  # Initialize with a large value
 
-    current_cost = get_error(theta0, theta1, price, normalized) # Error between actual and real price
-    cost_difference = abs(prev_cost - current_cost) # Absolute diference
-    prev_cost = current_cost # Update prev_cost
-    if cost_difference < tolerance: # If the difference is smaller than 0.001, return true
-        return True
-    return False
-
-def training_loop(normalized):
     try:
-        iterations = 10000000 # The loop can stop before
-        learning_rate = 0.001
-        theta0 =  0.0 # Always start on 0
-        theta1 =  0.0 # Always start on 0
         mileage, price = obtain_data()
 
         for i in range(iterations):
-            temp_theta0, temp_theta1 = get_thetas(normalized, price, theta0, theta1, learning_rate)
+            temp_theta0, temp_theta1 = get_thetas(normalized, price, theta0, theta1, 0.001)
             theta0 -= temp_theta0
             theta1 -= temp_theta1
 
             # Monitor the error of the linear regression until it be lower than 0.0001
-            if lower_tolerance(theta0, theta1, price, normalized) is True:
+            current_cost = get_error(theta0, theta1, price, normalized)
+            cost_difference = abs(prev_cost - current_cost)
+            prev_cost = current_cost
+            if cost_difference < tolerance:
                 break
 
-        return theta0, theta1
     except Exception as e:
         print("Error: ", e)
+    return theta0, theta1
 
 def train_model():
     try:
@@ -207,7 +203,7 @@ def train_model():
         min_mileage = min(mileage) # The lowest mileage value in the dataset
         normalized_mileage = [(x - min_mileage) / (max_mileage - min_mileage) for x in mileage] # Normalization
         # The formula scales the mileage value 0-1 --> 0 minimum mileage // 1 maximum mileage
-        
+
         # Obtain the thetas from the trained loop
         theta0, theta1 = training_loop(normalized_mileage)
         # Reverse normalization
