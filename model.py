@@ -46,7 +46,6 @@ def getLenData():
 def checkCorrectLenData():
     km = []
     price = []
-    i = 0
 
     with open("data.csv", 'r') as csv_file:
         csv_reader = csv.reader(csv_file)
@@ -60,25 +59,31 @@ def checkCorrectLenData():
                 if len(price[i]) == 0:
                     print("Error, incorrect price lenght")
                     sys.exit()
-                i += 1
 
+# Check if in the given string there are only digits
 def onlyNbr(str):
     if (len(str) != 0):
         for i in str:
-            if not i.isdigit() and i != ",":
+            if not i.isdigit():
                 return False
         return True
     return (True)
 
+# Check if in the dataset file there are numbers in km and price
 def checkNumbers():
+    i = 0
+
     with open("data.csv", 'r') as csv_file:
         csv_reader = csv.reader(csv_file)
-        next(csv_reader)  # Skip the header
         for row in csv_reader:
-            if (len(row) != 0 and (onlyNbr(row[0]) is False or onlyNbr(row[1]) is False)):
-                print("Error in datafile: not numeric character found")
-                sys.exit(-1)
+            if i > 1:
+                if (len(row) != 0 and (onlyNbr(row[0]) is False or onlyNbr(row[1]) is False)):
+                    print("Error in datafile: not numeric character found")
+                    sys.exit(-1)
+            if (len(row) != 0):
+                i += 1
 
+# Check there is a header
 def checkHeader():
     i = 0
 
@@ -92,30 +97,37 @@ def checkHeader():
             if (len(row) != 0):
                 i += 1
 
+# Check if the file is empty
 def is_empty_file(file):
-    return os.path.getsize(file) == 0
-
-def checkErrors():
-    if is_empty_file("data.csv"):
+    if os.path.getsize(file) == 0:
         print("The file is empty!")
         sys.exit(-1)
+
+# Check all the errors
+def check_errors():
+    is_empty_file("data.csv")
     checkHeader()
-    lenkm, lenPrice = getLenData() # Obtain the lenght of both columns
     checkCorrectLenData() # Check if there is any empty km or price (e.i.: ,3600)
+    lenkm, lenPrice = getLenData() # Obtain the lenght of both columns
     isCorrectData(lenkm, lenPrice) # Check if there is the same number of kms than prices
     isCorrectRow() # Tenemos 2 columnas solamente
     checkNumbers() # Check if there are only numbers
 
+def estimated_price(mileage, theta0, theta1):
+    return theta0 + (theta1 * mileage)
+
 # Update the thetas. Given formulas in the subject
 def get_thetas(mileage, price, theta0, theta1, learningRate):
+    m = len(mileage)
     temp0 = 0
     temp1 = 0
-    for i in range(len(mileage)):
-        temp0 += theta0 + theta1 * mileage[i] - price[i]
-        temp1 += (theta0 + theta1 * mileage[i] - price[i]) * mileage[i]
-    theta0 -= (learningRate * temp0) / len(mileage) # From the formula of linear regression, obtain the two variables
-    theta1 -= (learningRate * temp1) / len(mileage)
-    return theta0, theta1
+
+    temp0 = sum(estimated_price(mileage[i], theta0, theta1) - price[i] for i in range(m))
+    temp1 = sum((estimated_price(mileage[i], theta0, theta1) - price[i]) * mileage[i] for i in range(m))
+
+    tmp_theta0 = learningRate * (1/m) * temp0
+    tmp_theta1 = learningRate * (1/m) * temp1
+    return tmp_theta0, tmp_theta1
 
 # Calculate the standard desviation (error)
 def get_error(theta0, theta1, price, mileage):
@@ -128,37 +140,70 @@ def get_error(theta0, theta1, price, mileage):
     # The 2 * len(mileage) is to normalize the error
     return error
 
-
-def trainModel():
+def obtain_data():
+    km = []
     price = []
-    mileage = []
-    theta0 =  0.0 # Always start on 0
-    theta1 =  0.0 # Always start on 0
-    iterations = 1000 # The nbr of iterations will be 1000, we can change it if it is required
-    learningRate = 0.001
+
     try:
         with open("data.csv", 'r') as file: # With to open and close
             csv_reader = csv.reader(file)
-            next(csv_reader)  # Skip the header
             for row in csv_reader:
-                if len(row) != 0: # Skip the empty lines
-                    price.append(float(row[0])) # Cast km to float
-                    mileage.append(float(row[1])) # Cast price to float
+                if len(row) != 0 and onlyNbr(row[0]) is True and onlyNbr(row[1]) is True: # Skip the empty lines
+                    km.append(int(row[0]))
+                    price.append(int(row[1]))
+    except Exception as e:
+        print("Error: ", e)
+    return km, price
+
+def calculate_real_thetas(theta0, theta1, min, max):
+    real_theta0 = theta0 - theta1 * min / (max - min)
+    real_theta1 = theta1 / (max - min)
+    return real_theta0, real_theta1
+
+def training_loop(max, min, normalized):
+    try:
+        prev_cost = float('inf')  # Initialize with a large value
+        tolerance = 0.0001
+        iterations = 10000000 # The code can stop before
+        learning_rate = 0.001
+        theta0 =  0.0 # Always start on 0
+        theta1 =  0.0 # Always start on 0
+        mileage, price = obtain_data()
+
+        for i in range(iterations):
+            temp_theta0, temp_theta1 = get_thetas(normalized, price, theta0, theta1, learning_rate)
+            theta0 -= temp_theta0
+            theta1 -= temp_theta1
+
+            current_cost = get_error(theta0, theta1, price, normalized)
+            cost_difference = abs(prev_cost - current_cost)
+            prev_cost = current_cost
+
+            if cost_difference < tolerance:
+                break
+        
+        real_theta0, real_theta1 = calculate_real_thetas(theta0, theta1, min, max)
+        return real_theta0, real_theta1
+    except Exception as e:
+        print("Error: ", e)
+
+def train_model():
+    try:
+        mileage, price = obtain_data()
         if len(mileage) < 2:
             print("Please, provide a set of numbers in the data.csv file.")
             sys.exit(-1)
+
         # Normalize mileage data (optional but in our case necessary bc the numbers are so high)
         max_mileage = max(mileage) # The highest mileage value in the dataset
         min_mileage = min(mileage) # The lowest mileage value in the dataset
         normalized_mileage = [(x - min_mileage) / (max_mileage - min_mileage) for x in mileage] # Normalization
         # The formula scales the mileage value 0-1 --> 0 minimum mileage // 1 maximum mileage
         
-        # Training loop
-        for i in range(iterations):
-            theta0, theta1 = get_thetas(normalized_mileage, price, theta0, theta1, learningRate)
-            error = get_error(theta0, theta1, price, normalized_mileage)
+        real_theta0, real_theta1 = training_loop(max_mileage, min_mileage, normalized_mileage)
+
         with open('thetas.txt', 'w') as file:
-            file.write(f"{theta0} {theta1}\n")
+            file.write(f"{real_theta0} {real_theta1}\n")
         print("Trained!")
 
     except Exception as e:
@@ -166,10 +211,10 @@ def trainModel():
 
 def main():
     if os.path.exists("data.csv"): # Only if the file exists we can train our model
-        print("Checking errors...")
-        checkErrors()
+        print("Checking errors...") 
+        check_errors()
         print("Training...")
-        trainModel()
+        train_model()
     else:
         print("Please, provide a data.csv file")
 
