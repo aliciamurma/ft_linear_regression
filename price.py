@@ -14,7 +14,7 @@ def formula(theta0, theta1, mileage):
     value = float(theta0) + (float(theta1) * float(mileage))
     return value
 
-def trainedThetas(filename):
+def get_trained_thetas(filename):
     with open(filename, 'r') as file:
         theta0, theta1 = map(float, file.readline().split())
     return theta0, theta1
@@ -28,7 +28,7 @@ def onlyNbr(str):
     return True
 
 # Enter a mileage and check it is correct
-def enterMileage():
+def enter_mileage():
     mileage_str = input("Enter the mileage: ")
     while (len(mileage_str) == 0) or (onlyNbr(mileage_str) is False):
         mileage_str = input("Enter a positive numeric mileage: ")
@@ -44,9 +44,9 @@ def main():
     theta1 = 0.0
     price = []
 
-    mileage = enterMileage()
+    mileage = enter_mileage()
     if os.path.exists("thetas.txt"):
-        theta0, theta1 = trainedThetas("thetas.txt")
+        theta0, theta1 = get_trained_thetas("thetas.txt")
         price = formula(theta0, theta1, mileage)
     else:
         price = 0
