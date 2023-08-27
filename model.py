@@ -43,7 +43,7 @@ def getLenData():
 
     return len(km), len(price)
 
-def checkCorrectLenData():
+def checkCorrectLenData22():
     km = []
     price = []
     i = 0
@@ -51,7 +51,8 @@ def checkCorrectLenData():
     with open("data.csv", 'r') as csv_file:
         csv_reader = csv.reader(csv_file)
         for row in csv_reader:
-            if len(row) >= 2: # Si hay mas de 2 filas
+            if len(row) >= 2:
+                print("enter")
                 km.append(row[0])
                 price.append(row[1])
                 if len(km[i]) == 0:
@@ -60,6 +61,31 @@ def checkCorrectLenData():
                 if len(price[i]) == 0:
                     print("Error, incorrect price lenght")
                     sys.exit()
+            i += 1
+
+def checkCorrectLenData():
+    km = []
+    price = []
+    i = 0
+
+    with open("data.csv", 'r') as csv_file:
+        csv_reader = csv.reader(csv_file)
+        for row in csv_reader:
+            if len(row) >= 2:
+                if len(row) > 0:
+                    km_value = row[0]
+                    price_value = row[1]
+
+                if len(km_value) == 0:
+                    print("Error, incorrect km length")
+                    sys.exit()
+                if len(price_value) == 0:
+                    print("Error, incorrect price length")
+                    sys.exit()
+
+                km.append(km_value)
+                price.append(price_value)
+                
             i += 1
 
 # Check if in the given string there are only digits
@@ -78,7 +104,7 @@ def checkNumbers():
     with open("data.csv", 'r') as csv_file:
         csv_reader = csv.reader(csv_file)
         for row in csv_reader:
-            if i > 1:
+            if i > 0:
                 if (len(row) != 0 and (onlyNbr(row[0]) is False or onlyNbr(row[1]) is False)):
                     print("Error in datafile: not numeric character found")
                     sys.exit(-1)
@@ -221,7 +247,7 @@ def main():
         print("Checking errors...") 
         check_errors()
         print("Training...")
-        train_model()
+    #    train_model()
     else:
         print("Please, provide a data.csv file")
 
