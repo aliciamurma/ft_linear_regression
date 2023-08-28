@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 # Check if we have the same n for km and for price
 def isCorrectData(lenKm, lenPrice):
-    if (lenKm != lenPrice):
+    if lenKm != lenPrice or lenKm < 3:
         print("Error in datafile lenght")
         sys.exit(-1)
 
@@ -42,26 +42,6 @@ def getLenData():
                 price.append(row[1])
 
     return len(km), len(price)
-
-def checkCorrectLenData22():
-    km = []
-    price = []
-    i = 0
-
-    with open("data.csv", 'r') as csv_file:
-        csv_reader = csv.reader(csv_file)
-        for row in csv_reader:
-            if len(row) >= 2:
-                print("enter")
-                km.append(row[0])
-                price.append(row[1])
-                if len(km[i]) == 0:
-                    print("Error, incorrect km lenght")
-                    sys.exit()
-                if len(price[i]) == 0:
-                    print("Error, incorrect price lenght")
-                    sys.exit()
-            i += 1
 
 def checkCorrectLenData():
     km = []
