@@ -227,7 +227,7 @@ def main():
         print("Checking errors...") 
         check_errors()
         print("Training...")
-    #    train_model()
+        train_model()
     else:
         print("Please, provide a data.csv file")
 
